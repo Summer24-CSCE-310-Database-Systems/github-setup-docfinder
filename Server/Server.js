@@ -1,67 +1,60 @@
-//simple node.js webserver to take in post and get requests, contact a PSQL database, and return the results
-//importing the required modules
-const express = require('express');
-const bodyParser = require('body-parser');
-const app = express();
-const port = 3000;
+const http = require('http');
+const fs = require('fs');
+const path = require('path');
 const { Client } = require('pg');
-const cors = require('cors');
-const { response } = require('express');
-const { json } = require('body-parser');
 
-//setting up the connection to the PSQL database
-const client = new Client({
-    user: 'postgres',
+const hostname = '127.0.0.1';
+const port = 3000;
+const clientDir = path.join(__dirname, 'Client');
+
+// PostgreSQL database connection setup
+const dbClient = new Client({
+    user: 'your_db_user',
     host: 'localhost',
-    database
-    : 'postgres',
-    password: 'password',
+    database: 'your_db_name',
+    password: 'your_db_password',
     port: 5432,
 });
 
-client.connect();
+dbClient.connect()
+    .then(() => console.log('Connected to PostgreSQL database'))
+    .catch(err => console.error('Connection error', err.stack));
 
-//setting up the server to use the required modules
-app.use(cors());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+const server = http.createServer((req, res) => {
+    let filePath = path.join(clientDir, req.url === '/' ? 'Main.html' : req.url);
 
-//setting up the server to listen on port 3000
-app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
-});
+    const extname = String(path.extname(filePath)).toLowerCase();
+    const mimeTypes = {
+        '.html': 'text/html',
+        '.js': 'text/javascript',
+        '.css': 'text/css',
+        '.json': 'application/json',
+        '.png': 'image/png',
+        '.woff': 'application/font-woff',
+        '.ttf': 'application/font-ttf',
+        '.eot': 'application/vnd.ms-fontobject',
+        '.otf': 'application/font-otf',
+        '.svg': 'application/image/svg+xml'
+    };
 
-//setting up the server to handle a get request
-app.get('/', (req, res) => {
-    res.send('Hello World');
-});
+    const contentType = mimeTypes[extname] || 'application/octet-stream';
 
-//setting up the server to handle a post request
-app.post('/post', (req, res) => {
-    //getting the data from the post request
-    const data = req.body;
-    //querying the database
-    client.query('SELECT * FROM users WHERE id = $1', [data.id], (err, response) => {
-        if (err) {
-            console.log(err.stack);
+    fs.readFile(filePath, (error, content) => {
+        if (error) {
+            if (error.code === 'ENOENT') {
+                res.writeHead(404, { 'Content-Type': 'text/html' });
+                res.end('<h1>404 Not Found</h1>', 'utf-8');
+            } else {
+                res.writeHead(500);
+                res.end(`Server Error: ${error.code}`, 'utf-8');
+            }
         } else {
-            console.log(response.rows[0]);
-            res.send(response.rows[0]);
+            res.writeHead(200, { 'Content-Type': contentType });
+            res.end(content, 'utf-8');
         }
     });
 });
 
-//setting up the server to handle a get request
-app.get('/get', (req, res) => {
-    //getting the data from the get request
-    const data = req.query;
-    //querying the database
-    client.query('SELECT * FROM users WHERE id = $1', [data.id], (err, response) => {
-        if (err) {
-            console.log(err.stack);
-        } else {
-            console.log(response.rows[0]);
-            res.send(response.rows[0]);
-        }
-    });
+server.listen(port, hostname, () => {
+    console.log(`Server running at http://${hostname}:${port}/`);
 });
