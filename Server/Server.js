@@ -1,5 +1,4 @@
 //simple node.js webserver to take in post and get requests, contact a PSQL database, and return the results
-
 //importing the required modules
 const express = require('express');
 const bodyParser = require('body-parser');
