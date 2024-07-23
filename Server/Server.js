@@ -3,13 +3,9 @@ const fs = require('fs');
 const path = require('path');
 const { Client } = require('pg');
 
-const hostname = '127.0.0.1';
-const port = 3000;
-const clientDir = path.join(__dirname, 'Client');
-
-// PostgreSQL database connection setup
-const dbClient = new Client({
-    user: 'your_db_user',
+//setting up the connection to the PSQL database
+const client = new Client({
+    user: 'postgre1',
     host: 'localhost',
     database: 'your_db_name',
     password: 'your_db_password',
