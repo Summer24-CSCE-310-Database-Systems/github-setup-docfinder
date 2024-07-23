@@ -11,7 +11,7 @@ const { json } = require('body-parser');
 
 //setting up the connection to the PSQL database
 const client = new Client({
-    user: 'postgres',
+    user: 'postgre1',
     host: 'localhost',
     database
     : 'postgres',
