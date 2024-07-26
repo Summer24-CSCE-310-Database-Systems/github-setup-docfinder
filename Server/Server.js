@@ -3,16 +3,19 @@ const fs = require('fs');
 const path = require('path');
 const { Client } = require('pg');
 
-//setting up the connection to the PSQL database
+// server port and hostname
+const port = 3000;
+const hostname = 'localhost';
+
+// setting up the connection to the PSQL database
 const client = new Client({
-    user: 'postgre1',
-    host: 'localhost',
-    database: 'your_db_name',
-    password: 'your_db_password',
-    port: 5432,
+    connectionString: 'postgresql://postgres1:OFxTqKxLDjCirxD3lmh1CSzYavgof1yU@dpg-cqg321dds78s73c8721g-a.oregon-postgres.render.com/postgres1_h1qw',
+    ssl: {
+        rejectUnauthorized: false
+    }
 });
 
-dbClient.connect()
+client.connect()
     .then(() => console.log('Connected to PostgreSQL database'))
     .catch(err => console.error('Connection error', err.stack));
 
