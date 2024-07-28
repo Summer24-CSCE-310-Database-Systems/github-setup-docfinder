@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login/Register</title>
+    <script>
+        function showForm() {
+            const userType = document.querySelector('input[name="userType"]:checked').value;
+            const actionType = document.querySelector('input[name="actionType"]:checked').value;
+            const doctorFields = document.getElementById('doctorFields');
+            const patientFields = document.getElementById('patientFields');
+            const commonFields = document.getElementById('commonFields');
+            const registerFields = document.getElementById('registerFields');
+            const message = document.getElementById('message');
+
+            commonFields.style.display = 'block';
+            message.innerHTML = '';
+
+            if (actionType === 'register') {
+                registerFields.style.display = 'block';
+                if (userType === 'doctor') {
+                    doctorFields.style.display = 'block';
+                    patientFields.style.display = 'none';
+                } else {
+                    doctorFields.style.display = 'none';
+                    patientFields.style.display = 'block';
+                }
+            } else {
+                registerFields.style.display = 'none';
+                doctorFields.style.display = 'none';
+                patientFields.style.display = 'none';
+            }
+        }
+
+        function sendRequest(endpoint) {
+            const userType = document.querySelector('input[name="userType"]:checked').value;
+            const actionType = document.querySelector('input[name="actionType"]:checked').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const message = document.getElementById('message');
+
+            if (!email || !password) {
+                message.innerHTML = 'Please fill in all fields.';
+                return;
+            }
+
+            const data = { userType, email, password };
+
+            if (endpoint === 'register') {
+                if (userType === 'doctor') {
+                    const name = document.getElementById('docName').value;
+                    const specialty = document.getElementById('specialty').value;
+                    const loc = document.getElementById('loc').value;
+                    const phone = document.getElementById('docPhone').value;
+
+                    if (!name || !specialty || !loc || !phone) {
+                        message.innerHTML = 'Please fill in all fields.';
+                        return;
+                    }
+
+                    data.name = name;
+                    data.specialty = specialty;
+                    data.loc = loc;
+                    data.phone = phone;
+                } else {
+                    const name = document.getElementById('patName').value;
+                    const phone = document.getElementById('patPhone').value;
+
+                    if (!name || !phone) {
+                        message.innerHTML = 'Please fill in all fields.';
+                        return;
+                    }
+
+                    data.name = name;
+                    data.phone = phone;
+                }
+            }
+
+            fetch(`/${endpoint}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.cookie = `authToken=${data.token}; path=/;`;
+                    window.location.href = 'Dashboard.html';
+                } else {
+                    message.innerHTML = data.message || 'An error occurred. Please try again.';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                message.innerHTML = 'An error occurred. Please try again.';
+            });
+        }
+    </script>
+</head>
+<body>
+    <h1>Login/Register</h1>
+    <div>
+        <label><input type="radio" name="userType" value="doctor" onclick="showForm()"> Doctor</label>
+        <label><input type="radio" name="userType" value="patient" onclick="showForm()"> Patient</label>
+    </div>
+    <div>
+        <label><input type="radio" name="actionType" value="login" onclick="showForm()"> Login</label>
+        <label><input type="radio" name="actionType" value="register" onclick="showForm()"> Register</label>
+    </div>
+    <div id="commonFields" style="display: none;">
+        <input type="email" id="email" placeholder="Email" required />
+        <input type="password" id="password" placeholder="Password" required />
+    </div>
+    <div id="registerFields" style="display: none;">
+        <div id="doctorFields" style="display: none;">
+            <input type="text" id="docName" placeholder="Name" required />
+            <input type="text" id="specialty" placeholder="Specialty" required />
+            <input type="text" id="loc" placeholder="Location" required />
+            <input type="text" id="docPhone" placeholder="Phone" required />
+        </div>
+        <div id="patientFields" style="display: none;">
+            <input type="text" id="patName" placeholder="Name" required />
+            <input type="text" id="patPhone" placeholder="Phone" required />
+        </div>
+    </div>
+    <button onclick="sendRequest('login')">Login</button>
+    <button onclick="sendRequest('register')">Register</button>
+    <div id="message"></div>
+</body>
+</html>
