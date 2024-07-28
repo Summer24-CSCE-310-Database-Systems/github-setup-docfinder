@@ -49,7 +49,7 @@ document.getElementById('appointmentForm').addEventListener('submit', async func
 async function searchDoctors() {
     const searchQuery = document.getElementById('searchQuery').value;
 
-    const response = await fetch(`/searchDoctors?query=${encodeURIComponent(searchQuery)}`, {
+    const response = await fetch(`/searchDoctors`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'

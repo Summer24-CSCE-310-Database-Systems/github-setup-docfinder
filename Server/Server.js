@@ -57,6 +57,8 @@ const server = http.createServer(async (req, res) => {
             const { userType, email, password } = data;
 
             if (pathname === '/register') {
+                //print to console that a new user is being registered
+                console.log('A new user is being registered');
                 if (userType === 'doctor') {
                     const { name, specialty, loc, phone } = data;
                     try {
@@ -83,6 +85,8 @@ const server = http.createServer(async (req, res) => {
                     }
                 }
             } else if (pathname === '/login') {
+                //print to console that a user is logging in
+                console.log('A user is logging in');
                 if (userType === 'doctor') {
                     try {
                         const result = await client.query('SELECT * FROM doctors WHERE email = $1 AND password = $2', [email, password]);
@@ -116,11 +120,9 @@ const server = http.createServer(async (req, res) => {
                 }
             }
         });
-    } else if (pathname === '/' || pathname === '/Main.html') {
-        serveStaticFile(path.join(__dirname, 'Client', 'Main.html'), 'text/html', res);
-    } else if (pathname === '/login.html') {
-        serveStaticFile(path.join(__dirname, 'Client', 'login.html'), 'text/html', res);
-    } else if (pathname === '/getData' && parsedUrl.query.request === 'GetDoctors') {
+    } else if (pathname === '/getDoctors' && req.method === 'GET') {
+        //print to console that the doctors are being retrieved
+        console.log('Doctors are being retrieved');
         try {
             const result = await client.query('SELECT * FROM doctors');
             res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -130,6 +132,8 @@ const server = http.createServer(async (req, res) => {
             res.end(JSON.stringify({ error: 'Database query failed' }));
         }
     } else if (pathname === '/leaveReview' && req.method === 'POST') {
+        //print to console that a review is being left
+        console.log('A review is being left');
         let body = '';
         req.on('data', chunk => {
             body += chunk.toString();
@@ -148,6 +152,8 @@ const server = http.createServer(async (req, res) => {
             }
         });
     } else if (pathname === '/createAppointment' && req.method === 'POST') {
+        //print to console that an appointment is being created
+        console.log('An appointment is being created');
         let body = '';
         req.on('data', chunk => {
             body += chunk.toString();
@@ -166,6 +172,8 @@ const server = http.createServer(async (req, res) => {
             }
         });
     } else if (pathname === '/viewBills' && req.method === 'GET') {
+        //print to console that the bills are being retrieved
+        console.log('Bills are being retrieved');
         try {
             const result = await client.query('SELECT * FROM bills');
             res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -174,9 +182,36 @@ const server = http.createServer(async (req, res) => {
             res.writeHead(500, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ error: 'Failed to retrieve bills' }));
         }
+    } else if (pathname === '/' || pathname === '/Main.html') {
+        //print to console that the main page is being served
+        console.log('Main page is being served');
+        serveStaticFile(path.join(__dirname, 'Client', 'Main.html'), 'text/html', res);
+    } else if (pathname === '/login.html') {
+        //print to console that the login page is being served
+        console.log('Login page is being served');
+        serveStaticFile(path.join(__dirname, 'Client', 'login.html'), 'text/html', res);
+    } else if (pathname === '/Dashboard.html') {
+        //print to console that the dashboard page is being served
+        console.log('Dashboard page is being served');
+        // Verify the token
+        const token = parsedUrl.query.token;
+        jwt.verify(token, secretKey, (err, decoded) => {
+            // If the token is invalid, return an error
+            if (err) {
+                //print to console that the token is invalid
+                console.log('Invalid token');
+                res.writeHead(401, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Invalid token' }));
+            } else {
+                //print to console that the dashboard page is being served and the decoded email
+                console.log('Dashboard page is being served');
+                console.log('Decoded email:', decoded.email);
+                serveStaticFile(path.join(__dirname, 'Client', 'dashboard.html'), 'text/html', res);
+            }
+        });
     } else {
         serveStaticFile(path.join(__dirname, 'Client', pathname), getContentType(pathname), res);
-    }
+    } 
 });
 
 function getContentType(filePath) {
