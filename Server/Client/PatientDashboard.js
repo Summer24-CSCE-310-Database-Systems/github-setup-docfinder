@@ -182,3 +182,13 @@ async function editProfile() {
         alert('Failed to update profile');
     }
 }
+
+async function deleteAccount() {
+    const response = await fetch('/deleteAccount', {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}` // Include the token
+        }
+    });
+}
