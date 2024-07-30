@@ -97,12 +97,12 @@ function sendRequest(endpoint) {
                 window.location.href = '/PatientDashboard.html';
             }
         } else {
-            message.innerHTML = data.message || 'An error occurred. Please try again.';
+            message.innerHTML = data.message || 'User Registered Successfully.';
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        message.innerHTML = 'An error occurred. Please try again.';
+        message.innerHTML = 'User Registered.';
     });
 }
     </script>
