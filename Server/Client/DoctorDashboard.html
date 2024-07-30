@@ -32,7 +32,38 @@
         <input type="number" id="amount" name="amount" required><br>
         <button onclick="createBill()">Create Bill</button>
     </section>
-    
+
+    <!-- Delete Bill -->
+    <section>
+        <h2>Delete Bill</h2>
+        <label for="billId">Bill ID:</label>
+        <input type="number" id="billId" name="billId" required><br>
+        <button onclick="deleteBill()">Delete Bill</button>
+    </section>
+
+    <!-- Edit Account Information -->
+    <section>
+        <h2>Edit Account Information</h2>
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required><br>
+        <label for="specialty">Specialty:</label>
+        <input type="text" id="specialty" name="specialty" required><br>
+        <label for="location">Location:</label>
+        <input type="text" id="location" name="location" required><br>
+        <label for="phone">Phone:</label>
+        <input type="text" id="phone" name="phone" required><br>
+        <button onclick="editAccount()">Edit Account</button>
+    </section>
+
+    <!-- Logout -->
+    <section>
+        <button onclick="logout()">Logout</button>
+    </section>
+
+    <!-- Delete Account -->
+    <section>
+        <button onclick="deleteAccount()">Delete Account</button>
+    </section>
 
 </body>
 </html>
