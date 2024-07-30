@@ -8,7 +8,8 @@ document.getElementById('reviewForm').addEventListener('submit', async function(
     const response = await fetch('/leaveReview', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}` // Include the token
         },
         body: JSON.stringify({ doctorId, rating, review })
     });
@@ -32,7 +33,8 @@ document.getElementById('appointmentForm').addEventListener('submit', async func
     const response = await fetch('/createAppointment', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}` // Include the token
         },
         body: JSON.stringify({ doctorId, appointmentDate, description })
     });
@@ -52,7 +54,8 @@ async function searchDoctors() {
     const response = await fetch(`/searchDoctors`, {
         method: 'GET',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}` // Include the token
         }
     });
 
@@ -76,7 +79,8 @@ async function viewBills() {
     const response = await fetch('/viewBills', {
         method: 'GET',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}` // Include the token
         }
     });
 

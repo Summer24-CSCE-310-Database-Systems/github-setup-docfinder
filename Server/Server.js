@@ -4,13 +4,12 @@ const path = require('path');
 const url = require('url');
 const { Client } = require('pg');
 const jwt = require('jsonwebtoken');
-const express = require('express');
-const bodyParser = require('body-parser');
 
 // server port and hostname
 const port = 3000;
 const hostname = 'localhost';
 const secretKey = 'AIUdlHDSFIUh)*Q@U$ORFSJNDKJF';
+
 
 // setting up the connection to the PSQL database
 const client = new Client({
@@ -40,6 +39,18 @@ function serveStaticFile(filePath, contentType, res) {
             res.end(content, 'utf-8');
         }
     });
+}
+
+// Function to parse cookies from the request header
+function parseCookies(cookieHeader) {
+    const cookies = {};
+    if (cookieHeader) {
+        cookieHeader.split(';').forEach(cookie => {
+            const [name, ...rest] = cookie.split('=');
+            cookies[name.trim()] = rest.join('=').trim();
+        });
+    }
+    return cookies;
 }
 
 const server = http.createServer(async (req, res) => {
@@ -193,8 +204,10 @@ const server = http.createServer(async (req, res) => {
     } else if (pathname === '/Dashboard.html') {
         //print to console that the dashboard page is being served
         console.log('Dashboard page is being served');
-        // Verify the token
-        const token = parsedUrl.query.token;
+        // Extract the token from cookies
+        const cookies = parseCookies(req.headers.cookie);
+        const token = cookies.authToken;
+        console.log('Token:', token);
         jwt.verify(token, secretKey, (err, decoded) => {
             // If the token is invalid, return an error
             if (err) {

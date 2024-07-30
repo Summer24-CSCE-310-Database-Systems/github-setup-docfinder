@@ -34,70 +34,73 @@
         }
 
         function sendRequest(endpoint) {
-            const userType = document.querySelector('input[name="userType"]:checked').value;
-            const actionType = document.querySelector('input[name="actionType"]:checked').value;
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const message = document.getElementById('message');
+    const userType = document.querySelector('input[name="userType"]:checked').value;
+    const actionType = document.querySelector('input[name="actionType"]:checked').value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const message = document.getElementById('message');
 
-            if (!email || !password) {
+    if (!email || !password) {
+        message.innerHTML = 'Please fill in all fields.';
+        return;
+    }
+
+    const data = { userType, email, password };
+
+    if (endpoint === 'register') {
+        if (userType === 'doctor') {
+            const name = document.getElementById('docName').value;
+            const specialty = document.getElementById('specialty').value;
+            const loc = document.getElementById('loc').value;
+            const phone = document.getElementById('docPhone').value;
+
+            if (!name || !specialty || !loc || !phone) {
                 message.innerHTML = 'Please fill in all fields.';
                 return;
             }
 
-            const data = { userType, email, password };
+            data.name = name;
+            data.specialty = specialty;
+            data.loc = loc;
+            data.phone = phone;
+        } else {
+            const name = document.getElementById('patName').value;
+            const phone = document.getElementById('patPhone').value;
 
-            if (endpoint === 'register') {
-                if (userType === 'doctor') {
-                    const name = document.getElementById('docName').value;
-                    const specialty = document.getElementById('specialty').value;
-                    const loc = document.getElementById('loc').value;
-                    const phone = document.getElementById('docPhone').value;
-
-                    if (!name || !specialty || !loc || !phone) {
-                        message.innerHTML = 'Please fill in all fields.';
-                        return;
-                    }
-
-                    data.name = name;
-                    data.specialty = specialty;
-                    data.loc = loc;
-                    data.phone = phone;
-                } else {
-                    const name = document.getElementById('patName').value;
-                    const phone = document.getElementById('patPhone').value;
-
-                    if (!name || !phone) {
-                        message.innerHTML = 'Please fill in all fields.';
-                        return;
-                    }
-
-                    data.name = name;
-                    data.phone = phone;
-                }
+            if (!name || !phone) {
+                message.innerHTML = 'Please fill in all fields.';
+                return;
             }
 
-            fetch(`/${endpoint}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    document.cookie = `authToken=${data.token}; path=/;`;
-                    window.location.href = 'Dashboard.html';
-                } else {
-                    message.innerHTML = data.message || 'An error occurred. Please try again.';
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                message.innerHTML = 'An error occurred. Please try again.';
-            });
+            data.name = name;
+            data.phone = phone;
         }
+    }
+
+    fetch(`/${endpoint}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Set the token as a cookie
+            document.cookie = `token=${data.token}; path=/;`;
+
+            // Send a request to /Dashboard.html with the token included as an Authorization header
+            window.location.href = '/Dashboard.html';
+        } else {
+            message.innerHTML = data.message || 'An error occurred. Please try again.';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        message.innerHTML = 'An error occurred. Please try again.';
+    });
+}
     </script>
 </head>
 <body>
