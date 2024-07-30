@@ -291,7 +291,7 @@ const server = http.createServer(async (req, res) => {
         //print to console that the login page is being served
         console.log('Login page is being served');
         serveStaticFile(path.join(__dirname, 'Client', 'login.html'), 'text/html', res);
-    } else if (pathname === '/Dashboard.html') {
+    } else if (pathname === '/PatientDashboard.html') {
         //print to console that the dashboard page is being served
         // Extract the token from cookies
         const cookies = parseCookies(req.headers.cookie);
@@ -306,9 +306,29 @@ const server = http.createServer(async (req, res) => {
                 res.end(JSON.stringify({ error: 'Invalid token' }));
             } else {
                 //print to console that the dashboard page is being served and the decoded email
-                console.log('Dashboard page is being served');
+                console.log('Patient Dashboard page is being served');
                 console.log('Decoded email:', decoded.email);
-                serveStaticFile(path.join(__dirname, 'Client', 'dashboard.html'), 'text/html', res);
+                serveStaticFile(path.join(__dirname, 'Client', 'PatientDashboard.html'), 'text/html', res);
+            }
+        });
+    } else if (pathname === '/DoctorDashboard.html') {
+        //print to console that the dashboard page is being serv
+        // Extract the token from cookies
+        const cookies = parseCookies(req.headers.cookie);
+        const token = cookies.token;
+        console.log('Token:', token);
+        jwt.verify(token, secretKey, (err, decoded) => {
+            // If the token is invalid, return an error
+            if (err) {
+                //print to console that the token is invalid
+                console.log('Invalid token');
+                res.writeHead(401, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Invalid token' }));
+            } else {
+                //print to console that the dashboard page is being served and the decoded email
+                console.log('Doctor Dashboard page is being served');
+                console.log('Decoded email:', decoded.email);
+                serveStaticFile(path.join(__dirname, 'Client', 'DoctorDashboard.html'), 'text/html', res);
             }
         });
     } else {

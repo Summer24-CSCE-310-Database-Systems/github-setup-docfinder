@@ -91,7 +91,11 @@ function sendRequest(endpoint) {
             document.cookie = `token=${data.token}; path=/;`;
 
             // Send a request to /Dashboard.html with the token included as an Authorization header
-            window.location.href = '/Dashboard.html';
+            if (userType === 'doctor') {
+                window.location.href = '/DoctorDashboard.html';
+            } else {
+                window.location.href = '/PatientDashboard.html';
+            }
         } else {
             message.innerHTML = data.message || 'An error occurred. Please try again.';
         }

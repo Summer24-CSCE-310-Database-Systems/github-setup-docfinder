@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="DoctorDashboard.js"></script>
+</head>
+<body>
+    <h1>Doctor Dashboard</h1>
+
+    <!-- View Appointments -->  
+    <section>
+        <h2>View Appointments</h2>
+        <button onclick="viewAppointments()">View My Appointments</button>
+        <div id="appointmentResults"></div>
+    </section>
+
+    <!-- View Patients -->
+    <section>
+        <h2>View Patients</h2>
+        <button onclick="viewPatients()">View My Patients</button>
+        <div id="patientResults"></div>
+    </section>
+
+    <!-- Create Bill -->
+    <section>
+        <h2>Create Bill</h2>
+        <label for="patientId">Patient ID:</label>
+        <input type="number" id="billPatientId" name="patientId" required><br>
+        <label for="amount">Amount:</label>
+        <input type="number" id="amount" name="amount" required><br>
+        <button onclick="createBill()">Create Bill</button>
+    </section>
+    
+
+</body>
+</html>
