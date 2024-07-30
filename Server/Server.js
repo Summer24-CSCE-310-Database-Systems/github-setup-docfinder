@@ -131,18 +131,31 @@ const server = http.createServer(async (req, res) => {
                 }
             }
         });
-    } else if (pathname === '/getDoctors' && req.method === 'GET') {
-        //print to console that the doctors are being retrieved
-        console.log('Doctors are being retrieved');
-        try {
-            const result = await client.query('SELECT * FROM doctors');
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify(result.rows));
-        } catch (err) {
-            res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Database query failed' }));
-        }
-    } else if (pathname === '/leaveReview' && req.method === 'POST') {
+    } else if (pathname === '/getDoctors' && req.method === 'POST') {
+        let body = '';
+        req.on('data', chunk => {
+            body += chunk.toString();
+        });
+        req.on('end', async () => {
+            const data = JSON.parse(body);
+            const { location, specialty } = data;
+            //print to console that the doctors are being retrieved
+            console.log('Doctors are being retrieved');
+            if (!location || !specialty) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Missing location or specialty' }));
+                return;
+            }
+            try {
+                const result = await client.query('SELECT * FROM doctors WHERE loc = $1 AND specialty = $2', [location, specialty]);
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify(result.rows));
+            } catch (err) {
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Database query failed' }));
+            }
+        });
+        } else if (pathname === '/leaveReview' && req.method === 'POST') {
         //print to console that a review is being left
         console.log('A review is being left');
         let body = '';
@@ -152,8 +165,8 @@ const server = http.createServer(async (req, res) => {
         req.on('end', async () => {
             const data = JSON.parse(body);
             const { doctorId, rating, review } = data;
-
             try {
+                console.log('making query: ', 'INSERT INTO reviews (doctorID, rating, review) VALUES ($1, $2, $3)', [doctorId, rating, review]);
                 await client.query('INSERT INTO reviews (doctorID, rating, review) VALUES ($1, $2, $3)', [doctorId, rating, review]);
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ success: true }));
@@ -185,14 +198,91 @@ const server = http.createServer(async (req, res) => {
     } else if (pathname === '/viewBills' && req.method === 'GET') {
         //print to console that the bills are being retrieved
         console.log('Bills are being retrieved');
-        try {
-            const result = await client.query('SELECT * FROM bills');
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify(result.rows));
-        } catch (err) {
-            res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Failed to retrieve bills' }));
+        // Retrieve the patientID associated with the email in the token
+        const cookies = parseCookies(req.headers.cookie);
+        const token = cookies.token;
+        jwt.verify(token, secretKey, async (err, decoded) => {
+            if (err) {
+                res.writeHead(401, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Invalid token' }));
+            } else {
+                const email = decoded.email;
+                try {
+                    const result = await client.query('SELECT * FROM bills WHERE patientID = (SELECT patientID FROM patients WHERE email = $1)', [email]);
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify(result.rows));
+                } catch (err) {
+                    res.writeHead(500, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: 'Failed to retrieve bills' }));
+                }
+            }
+        });
+    } else if (pathname === '/getDoctorReviews' && req.method === 'POST') {
+        // print to console that the reviews are being retrieved
+        console.log('Reviews are being retrieved');
+        let body = '';
+        req.on('data', chunk => {
+            body += chunk.toString();
+        });
+        req.on('end', async () => {
+            const data = JSON.parse(body);
+            const { doctorId } = data;
+
+            try {
+                const result = await client.query('SELECT * FROM reviews WHERE doctorID = $1', [doctorId]);
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify(result.rows));
+            }
+            catch (err) {
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Failed to retrieve reviews' }));
+            }
         }
+        );
+    } else if (pathname === '/editProfile' && req.method === 'GET') {
+        //print to console that the profile is being edited
+        console.log('Profile is being edited');
+        // Retrieve the patientID associated with the email in the token
+        const cookies = parseCookies(req.headers.cookie);
+        const token = cookies.token;
+        jwt.verify(token, secretKey, async (err, decoded) => {
+            if (err) {
+                res.writeHead(401, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Invalid token' }));
+            } else {
+                const email = decoded.email;
+                try {
+                    const result = await client.query('SELECT * FROM patients WHERE email = $1', [email]);
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify(result.rows));
+                } catch (err) {
+                    res.writeHead(500, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: 'Failed to retrieve profile' }));
+                }
+            }
+        });
+    } else if (pathname === '/viewAppointments' && req.method === 'GET') {
+        // print to console that the appointments are being retrieved
+        console.log('Appointments are being retrieved');
+        // Retrieve the patientID associated with the email in the token
+        const cookies = parseCookies(req.headers.cookie);
+        const token = cookies.token;
+        jwt.verify(token, secretKey, async (err, decoded) => {
+            if (err) {
+                res.writeHead(401, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Invalid token' }));
+            } else {
+                const email = decoded.email;
+                try {
+                    const result = await client.query('SELECT * FROM appointments WHERE patientID = (SELECT patientID FROM patients WHERE email = $1)', [email]);
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify(result.rows));
+                } catch (err) {
+                    res.writeHead(500, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: 'Failed to retrieve appointments' }));
+                }
+            }
+        });
     } else if (pathname === '/' || pathname === '/Main.html') {
         //print to console that the main page is being served
         console.log('Main page is being served');
@@ -203,10 +293,9 @@ const server = http.createServer(async (req, res) => {
         serveStaticFile(path.join(__dirname, 'Client', 'login.html'), 'text/html', res);
     } else if (pathname === '/Dashboard.html') {
         //print to console that the dashboard page is being served
-        console.log('Dashboard page is being served');
         // Extract the token from cookies
         const cookies = parseCookies(req.headers.cookie);
-        const token = cookies.authToken;
+        const token = cookies.token;
         console.log('Token:', token);
         jwt.verify(token, secretKey, (err, decoded) => {
             // If the token is invalid, return an error

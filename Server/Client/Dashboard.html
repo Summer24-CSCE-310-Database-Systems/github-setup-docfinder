@@ -12,7 +12,8 @@
     <!-- Search for Doctors -->
     <section>
         <h2>Search for Doctors</h2>
-        <input type="text" id="searchQuery" placeholder="Enter specialty or location">
+        <input type="text" id="specialty" placeholder="Enter specialty">
+        <input type="text" id="location" placeholder="Enter location">
         <button onclick="searchDoctors()">Search</button>
         <div id="searchResults"></div>
     </section>
@@ -20,29 +21,41 @@
     <!-- Leave a Review -->
     <section>
         <h2>Leave a Review</h2>
-        <form id="reviewForm">
-            <label for="doctorId">Doctor ID:</label>
-            <input type="number" id="doctorId" name="doctorId" required><br>
-            <label for="rating">Rating:</label>
-            <input type="number" id="rating" name="rating" min="1" max="5" required><br>
-            <label for="review">Review:</label>
-            <textarea id="review" name="review" required></textarea><br>
-            <button type="submit">Submit Review</button>
-        </form>
+        <label for="doctorId">Doctor ID:</label>
+        <input type="number" id="ReviewdoctorId" name="doctorId"><br>
+        <label for="rating">Rating:</label>
+        <input type="number" id="Reviewrating" name="rating"><br>
+        <label for="review">Review:</label>
+        <textarea id="Reviewreview" name="review"></textarea><br>
+        <button onclick="leaveReview()">Submit Review</button>
+    </section>
+
+    <!-- Get Doctor Reviews-->
+    <section>
+        <h2>Get Doctor Reviews</h2>
+        <label for="doctorId">Doctor ID:</label>
+        <input type="number" id="doctorId" name="doctorId" required><br>
+        <button onclick="getDoctorReviews()">Get Reviews</button>
+        <div id="reviewResults"></div>
     </section>
 
     <!-- Create an Appointment -->
     <section>
         <h2>Create an Appointment</h2>
-        <form id="appointmentForm">
-            <label for="doctorId">Doctor ID:</label>
-            <input type="number" id="appointmentDoctorId" name="doctorId" required><br>
-            <label for="appointmentDate">Date:</label>
-            <input type="date" id="appointmentDate" name="appointmentDate" required><br>
-            <label for="description">Description:</label>
-            <textarea id="description" name="description" required></textarea><br>
-            <button type="submit">Create Appointment</button>
-        </form>
+        <label for="doctorId">Doctor ID:</label>
+        <input type="number" id="appointmentDoctorId" name="doctorId" required><br>
+        <label for="appointmentDate">Date:</label>
+        <input type="date" id="appointmentDate" name="appointmentDate" required><br>
+        <label for="description">Description:</label>
+        <textarea id="description" name="description" required></textarea><br>
+        <button onclick="createAppointment()">Create Appointment</button>
+    </section>
+
+    <!-- View Appointments -->
+    <section>
+        <h2>View Appointments</h2>
+        <button onclick="viewAppointments()">View My Appointments</button>
+        <div id="appointmentResults"></div>
     </section>
 
     <!-- View Bills -->
@@ -50,6 +63,23 @@
         <h2>View Bills</h2>
         <button onclick="viewBills()">View My Bills</button>
         <div id="billResults"></div>
+    </section>
+
+    <!-- Logout -->
+    <section>
+        <button onclick="logout()">Logout</button>
+    </section>
+
+    <!-- Edit Profile | Name | phone | email-->
+    <section> 
+        <h2>Edit Profile</h2>
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name"><br>
+        <label for="phone">Phone:</label>
+        <input type="text" id="phone" name="phone"><br>
+        <label for="email">Email:</label>
+        <input type="text" id="email" name="email"><br>
+        <button onclick="editProfile()">Edit Profile</button>
     </section>
 </body>
 </html>
