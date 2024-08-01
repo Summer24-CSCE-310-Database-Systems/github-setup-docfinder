@@ -40,6 +40,16 @@ async function deleteBill(){
     });
 }
 
+async function viewProfile() {
+    const response = await fetch('/viewProfile', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}` // Include the token
+        }
+    });
+}
+
 async function editAccount(){
     const response = await fetch('/editAccount', {
         method: 'PUT',
