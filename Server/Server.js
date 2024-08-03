@@ -283,10 +283,10 @@ const server = http.createServer(async (req, res) => {
                 }
             }
         });
-    } else if (pathname === '/' || pathname === '/Main.html') {
+    } else if (pathname === '/') {
         //print to console that the main page is being served
-        console.log('Main page is being served');
-        serveStaticFile(path.join(__dirname, 'Client', 'Main.html'), 'text/html', res);
+        console.log('Default Reference Page is being served');
+        serveStaticFile(path.join(__dirname, 'Client', 'login.html'), 'text/html', res);
     } else if (pathname === '/login.html') {
         //print to console that the login page is being served
         console.log('Login page is being served');
