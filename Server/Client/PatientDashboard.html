@@ -70,6 +70,13 @@
         <button onclick="logout()">Logout</button>
     </section>
 
+    <!-- Get Account Info-->
+    <section>
+        <h2>Get Account Info</h2>
+        <button onclick="getAccountInfo()">Get Account Info</button>
+        <div id="accountInfo"></div>
+    </section>
+
     <!-- Edit Profile | Name | phone | email-->
     <section> 
         <h2>Edit Profile</h2>
@@ -79,6 +86,8 @@
         <input type="text" id="phone" name="phone"><br>
         <label for="email">Email:</label>
         <input type="text" id="email" name="email"><br>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password"><br>
         <button onclick="editProfile()">Edit Profile</button>
     </section>
 

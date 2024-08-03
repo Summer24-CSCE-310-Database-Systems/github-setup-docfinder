@@ -283,6 +283,114 @@ const server = http.createServer(async (req, res) => {
                 }
             }
         });
+    } else if (pathname === '/getAccountInfo' && req.method === 'GET') {
+        // print to console that the account info is being retrieved
+        console.log('Account info is being retrieved');
+        // Retrieve the patientID associated with the email in the token
+        const cookies = parseCookies(req.headers.cookie);
+        const token = cookies.token;
+        jwt.verify(token, secretKey, async (err, decoded) => {
+            if (err) {
+                res.writeHead(401, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Invalid token' }));
+            } else {
+                const email = decoded.email;
+                try {
+                    // Check if the request has the AccountType header of Patient or Doctor
+                    const accountType = req.headers.accounttype;
+                    if (accountType === 'Patient') {
+                        const result = await client.query('SELECT * FROM patients WHERE email = $1', [email]);
+                        res.writeHead(200, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify(result.rows));
+                    } else if (accountType === 'Doctor') {
+                        const result = await client.query('SELECT * FROM doctors WHERE email = $1', [email]);
+                        res.writeHead(200, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify(result.rows));
+                    } else {
+                        res.writeHead(400, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ error: 'Missing AccountType header' }));
+                    }
+                } catch (err) {
+                    res.writeHead(500, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: 'Failed to retrieve account info' }));
+                }
+            }
+        });
+    } else if (pathname === '/editProfile' && req.method === 'POST') {
+        //print to console that the profile is being edited
+        console.log('Profile is being edited');
+        // Retrieve the patientID associated with the email in the token
+        const cookies = parseCookies(req.headers.cookie);
+        const token = cookies.token;
+        jwt.verify(token, secretKey, async (err, decoded) => {
+            if (err) {
+                res.writeHead(401, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Invalid token' }));
+            } else {
+                const email = decoded.email;
+                let body = '';
+                req.on('data', chunk => {
+                    body += chunk.toString();
+                });
+                req.on('end', async () => {
+                    const data = JSON.parse(body);
+                    const { name, phone, email, password } = data;
+                    try {
+                        // Check if the request has the AccountType header of Patient or Doctor
+                        const accountType = req.headers.accounttype;
+                        if (accountType === 'Patient') {
+                            await client.query('UPDATE patients SET name = $1, phone = $2, email = $3, password = $4 WHERE email = $5', [name, phone, email, password, email]);
+                            //return success
+                            res.writeHead(200, { 'Content-Type': 'application/json' });
+                            res.end(JSON.stringify({ success: true }));
+                        } else if (accountType === 'Doctor') {
+                            await client.query('UPDATE doctors SET name = $1, phone = $2, email = $3, password = $4 WHERE email = $5', [name, phone, email, password, email]);
+                            res.writeHead(200, { 'Content-Type': 'application/json' });
+                            res.end(JSON.stringify({ success: true }));
+                        } else {
+                            res.writeHead(400, { 'Content-Type': 'application/json' });
+                            res.end(JSON.stringify({ error: 'Missing AccountType header' }));
+                        }
+                    } catch (err) {
+                        res.writeHead(500, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ success: false, error: 'Failed to update profile' }));
+                    }
+                });
+            }
+        });
+    } else if (pathname === '/deleteAccount' && req.method === 'DELETE') {
+        //print to console that the account is being deleted
+        console.log('Account is being deleted');
+        // Retrieve the patientID associated with the email in the token
+        const cookies = parseCookies(req.headers.cookie);
+        const token = cookies.token;
+        jwt.verify(token, secretKey, async (err, decoded) => {
+            if (err) {
+                res.writeHead(401, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Invalid token' }));
+            } else {
+                const email = decoded.email;
+                try {
+                    // Check if the request has the AccountType header of Patient or Doctor
+                    const accountType = req.headers.accounttype;
+                    if (accountType === 'Patient') {
+                        await client.query('DELETE FROM patients WHERE email = $1', [email]);
+                        res.writeHead(200, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ success: true }));
+                    } else if (accountType === 'Doctor') {
+                        await client.query('DELETE FROM doctors WHERE email = $1', [email]);
+                        res.writeHead(200, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ success: true }));
+                    } else {
+                        res.writeHead(400, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ error: 'Missing AccountType header' }));
+                    }
+                } catch (err) {
+                    res.writeHead(500, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ success: false, error: 'Failed to delete account' }));
+                }
+            }
+        });
     } else if (pathname === '/') {
         //print to console that the main page is being served
         console.log('Default Reference Page is being served');
