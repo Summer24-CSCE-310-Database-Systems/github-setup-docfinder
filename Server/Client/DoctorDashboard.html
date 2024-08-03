@@ -16,20 +16,13 @@
         <div id="appointmentResults"></div>
     </section>
 
-    <!-- View Patients -->
-    <section>
-        <h2>View Patients</h2>
-        <button onclick="viewPatients()">View My Patients</button>
-        <div id="patientResults"></div>
-    </section>
-
     <!-- Create Bill -->
     <section>
         <h2>Create Bill</h2>
         <label for="patientId">Patient ID:</label>
-        <input type="number" id="billPatientId" name="patientId" required><br>
+        <input type="number" id="patientId" name="patientId" required><br>
         <label for="amount">Amount:</label>
-        <input type="number" id="amount" name="amount" required><br>
+        <input type="number" id="billAmount" name="amount" required><br>
         <button onclick="createBill()">Create Bill</button>
     </section>
 
@@ -44,8 +37,8 @@
     <!-- View Profile Information-->
     <section>
         <h2>View Profile Information</h2>
-        <button onclick="viewProfile()">View My Profile</button>
-        <div id="profileResults"></div>
+        <button onclick="getAccountInfo()">View My Profile</button>
+        <div id="accountInfo"></div>
     </section>
 
     <!-- Edit Account Information -->
@@ -59,7 +52,11 @@
         <input type="text" id="location" name="location" required><br>
         <label for="phone">Phone:</label>
         <input type="text" id="phone" name="phone" required><br>
-        <button onclick="editAccount()">Edit Account</button>
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required><br>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required><br>
+        <button onclick="editProfile()">Edit Account</button>
     </section>
 
     <!-- Logout -->

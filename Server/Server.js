@@ -195,6 +195,55 @@ const server = http.createServer(async (req, res) => {
                 res.end(JSON.stringify({ success: false, error: 'Failed to create appointment' }));
             }
         });
+    } else if (pathname == '/createBill' && req.method === 'POST'){
+        // print to the console that a bill is being created
+        console.log('A bill is being created');
+        // Retrieve the patientID associated with the email in the token
+        const cookies = parseCookies(req.headers.cookie);
+        const token = cookies.token;
+        jwt.verify(token, secretKey, async (err, decoded) => {
+            if (err) {
+                res.writeHead(401, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Invalid token' }));
+            } else {
+                const email = decoded.email;
+                let body = '';
+                req.on('data', chunk => {
+                    body += chunk.toString();
+                });
+                req.on('end', async () => {
+                    const data = JSON.parse(body);
+                    const { patientid, bill} = data;
+                    try {
+                        await client.query('INSERT INTO bills (patientid, bill) VALUES ($1, $2)', [patientid, bill]);
+                        res.writeHead(200, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ success: true }));
+                    } catch (err) {
+                        res.writeHead(500, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ success: false, error: 'Failed to create bill' }));
+                    }
+                });
+            }
+        });
+    } else if (pathname === '/deleteBill' && req.method === 'DELETE') {
+        //print to console that the bill is being deleted
+        console.log('Bill is being deleted');
+        let body = '';
+        req.on('data', chunk => {
+            body += chunk.toString();
+        });
+        req.on('end', async () => {
+            const data = JSON.parse(body);
+            const { billid } = data;
+            try {
+                await client.query('DELETE FROM bills WHERE billid = $1', [billid]);
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: true }));
+            } catch (err) {
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: false, error: 'Failed to delete bill' }));
+            }
+        });
     } else if (pathname === '/viewBills' && req.method === 'GET') {
         //print to console that the bills are being retrieved
         console.log('Bills are being retrieved');
@@ -274,9 +323,20 @@ const server = http.createServer(async (req, res) => {
             } else {
                 const email = decoded.email;
                 try {
-                    const result = await client.query('SELECT * FROM appointments WHERE patientID = (SELECT patientID FROM patients WHERE email = $1)', [email]);
-                    res.writeHead(200, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify(result.rows));
+                    // Check if the request has the AccountType header of Patient or Doctor
+                    const accountType = req.headers.accounttype;
+                    if (accountType === 'Patient') {
+                        const result = await client.query('SELECT * FROM appointments WHERE patientID = (SELECT patientID FROM patients WHERE email = $1)', [email]);
+                        res.writeHead(200, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify(result.rows));
+                    } else if (accountType === 'Doctor') {
+                        const result = await client.query('SELECT * FROM appointments WHERE doctorID = (SELECT doctorID FROM doctors WHERE email = $1)', [email]);
+                        res.writeHead(200, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify(result.rows));
+                    } else {
+                        res.writeHead(400, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ error: 'Missing AccountType header' }));
+                    }
                 } catch (err) {
                     res.writeHead(500, { 'Content-Type': 'application/json' });
                     res.end(JSON.stringify({ error: 'Failed to retrieve appointments' }));
@@ -333,18 +393,22 @@ const server = http.createServer(async (req, res) => {
                     body += chunk.toString();
                 });
                 req.on('end', async () => {
-                    const data = JSON.parse(body);
-                    const { name, phone, email, password } = data;
+    
                     try {
                         // Check if the request has the AccountType header of Patient or Doctor
                         const accountType = req.headers.accounttype;
                         if (accountType === 'Patient') {
+                            const data = JSON.parse(body);
+                            const { name, phone, email, password } = data;
                             await client.query('UPDATE patients SET name = $1, phone = $2, email = $3, password = $4 WHERE email = $5', [name, phone, email, password, email]);
                             //return success
                             res.writeHead(200, { 'Content-Type': 'application/json' });
                             res.end(JSON.stringify({ success: true }));
                         } else if (accountType === 'Doctor') {
-                            await client.query('UPDATE doctors SET name = $1, phone = $2, email = $3, password = $4 WHERE email = $5', [name, phone, email, password, email]);
+                            const data = JSON.parse(body);
+                            const { name, specialty, loc, phone, email, password } = data;
+                            console.log("Updating doctor profile");
+                            await client.query('UPDATE doctors SET name = $1, specialty = $2, loc = $3, phone = $4, email = $5, password = $6 WHERE email = $5', [name, specialty, loc, phone, email, password]);
                             res.writeHead(200, { 'Content-Type': 'application/json' });
                             res.end(JSON.stringify({ success: true }));
                         } else {
@@ -352,6 +416,7 @@ const server = http.createServer(async (req, res) => {
                             res.end(JSON.stringify({ error: 'Missing AccountType header' }));
                         }
                     } catch (err) {
+                        console.log(err);
                         res.writeHead(500, { 'Content-Type': 'application/json' });
                         res.end(JSON.stringify({ success: false, error: 'Failed to update profile' }));
                     }
