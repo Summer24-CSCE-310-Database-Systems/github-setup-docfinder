@@ -70,7 +70,38 @@ const server = http.createServer(async (req, res) => {
             if (pathname === '/register') {
                 //print to console that a new user is being registered
                 console.log('A new user is being registered');
+                var registrationChecker = 1;
+                // check if the email already exists in the database
                 if (userType === 'doctor') {
+                    try {
+                        const result = await client.query('SELECT * FROM doctors WHERE email = $1', [email]);
+                        if (result.rows.length > 0) {
+                            res.writeHead(409, { 'Content-Type': 'application/json' });
+                            res.end(JSON.stringify({ error: 'Email already exists' }));
+                            registrationChecker = 0;
+                        }
+                    } catch (err) {
+                        res.writeHead(500, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ error: 'Database error' }));
+                        registrationChecker = 0;
+                    }
+                }
+                else if (userType === 'patient') {
+                    try {
+                        const result = await client.query('SELECT * FROM patients WHERE email = $1', [email]);
+                        if (result.rows.length > 0) {
+                            res.writeHead(409, { 'Content-Type': 'application/json' });
+                            res.end(JSON.stringify({ error: 'Email already exists' }));
+                            registrationChecker = 0;
+                        }
+                    } catch (err) {
+                        res.writeHead(500, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ error: 'Database error' }));
+                        registrationChecker = 0;
+                    }
+                }
+                
+                if (userType === 'doctor' && registrationChecker == 1) {
                     const { name, specialty, loc, phone } = data;
                     try {
                         await client.query('INSERT INTO doctors (name, specialty, loc, phone, email, password) VALUES ($1, $2, $3, $4, $5, $6)', 
@@ -82,7 +113,7 @@ const server = http.createServer(async (req, res) => {
                         res.writeHead(500, { 'Content-Type': 'application/json' });
                         res.end(JSON.stringify({ error: 'Registration failed' }));
                     }
-                } else if (userType === 'patient') {
+                } else if (userType === 'patient' && registrationChecker == 1) {
                     const { name, phone } = data;
                     try {
                         await client.query('INSERT INTO patients (name, phone, email, password) VALUES ($1, $2, $3, $4)', 

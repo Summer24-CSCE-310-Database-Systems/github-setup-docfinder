@@ -95,12 +95,12 @@
                         window.location.href = '/PatientDashboard.html';
                     }
                 } else {
-                    message.innerHTML = data.message || 'User Registered Successfully.';
+                    message.innerHTML = data.message || 'User Not Registered.';
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                message.innerHTML = 'User Registered.';
+                message.innerHTML = 'User Not Registered.';
             });
         }
     </script>
