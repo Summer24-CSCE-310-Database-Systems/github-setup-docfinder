@@ -178,21 +178,38 @@ const server = http.createServer(async (req, res) => {
     } else if (pathname === '/createAppointment' && req.method === 'POST') {
         //print to console that an appointment is being created
         console.log('An appointment is being created');
-        let body = '';
-        req.on('data', chunk => {
-            body += chunk.toString();
-        });
-        req.on('end', async () => {
-            const data = JSON.parse(body);
-            const { doctorId, appointmentDate, description } = data;
-
-            try {
-                await client.query('INSERT INTO appointments (doctorID, appointmentDate, description) VALUES ($1, $2, $3)', [doctorId, appointmentDate, description]);
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ success: true }));
-            } catch (err) {
-                res.writeHead(500, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ success: false, error: 'Failed to create appointment' }));
+        // Retrieve the patientID associated with the email in the token
+        const cookies = parseCookies(req.headers.cookie);
+        const token = cookies.token;
+        jwt.verify(token, secretKey, async (err, decoded) => {
+            if (err) {
+                res.writeHead(401, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Invalid token' }));
+            } else {
+                const email = decoded.email;
+                try {
+                    const result = await client.query('SELECT patientID FROM patients WHERE email = $1', [email]);
+                    let body = '';
+                    req.on('data', chunk => {
+                        body += chunk.toString();
+                    });
+                    patientid = result.rows[0].patientid;
+                    req.on('end', async () => {
+                        const data = JSON.parse(body);
+                        const { doctorId, appointmentDate, description } = data;
+                        try {
+                            await client.query('INSERT INTO appointments (doctorID, patientid, appointmentDate, description) VALUES ($1, $2, $3, $4)', [doctorId, patientid, appointmentDate, description]);
+                            res.writeHead(200, { 'Content-Type': 'application/json' });
+                            res.end(JSON.stringify({ success: true }));
+                        } catch (err) {
+                            res.writeHead(500, { 'Content-Type': 'application/json' });
+                            res.end(JSON.stringify({ success: false, error: 'Failed to create appointment' }));
+                        }
+                    });
+                } catch (err) {
+                    res.writeHead(500, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: 'Failed to retrieve patientID' }));
+                }
             }
         });
     } else if (pathname == '/createBill' && req.method === 'POST'){

@@ -19,7 +19,7 @@ async function searchDoctors() {
     if (data.length > 0) {
         data.forEach(doctor => {
             const div = document.createElement('div');
-            div.innerHTML = `<p>${doctor.name} - ${doctor.specialty} - ${doctor.loc} - ${doctor.phone}</p>`;
+            div.innerHTML = `<p>${doctor.doctorid} - {doctor.name} - ${doctor.specialty} - ${doctor.loc} - ${doctor.phone}</p>`;
             searchResults.appendChild(div);
         });
     } else {
@@ -121,7 +121,7 @@ async function viewBills() {
     if (data.length > 0) {
         data.forEach(bill => {
             const div = document.createElement('div');
-            div.innerHTML = `<p>Bill ID: ${bill.billID}, Amount: $${bill.bill}</p>`;
+            div.innerHTML = `<p>Bill ID: ${bill.billid}, Amount: $${bill.bill}</p>`;
             billResults.appendChild(div);
         });
     } else {
@@ -134,7 +134,8 @@ async function viewAppointments() {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}` // Include the token
+            'Authorization': `Bearer ${localStorage.getItem('token')}`, // Include the token
+            'AccountType': `Patient`
         }
     });
 
@@ -146,7 +147,7 @@ async function viewAppointments() {
     if (data.length > 0) {
         data.forEach(appointment => {
             const div = document.createElement('div');
-            div.innerHTML = `<p>Doctor: ${appointment.doctorName}, Date: ${appointment.date}, Description: ${appointment.description}</p>`;
+            div.innerHTML = `<p>Doctor: ${appointment.doctorid}, Date: ${appointment.appointmentdate}, Description: ${appointment.description}</p>`;
             appointmentResults.appendChild(div);
         });
     } else {
